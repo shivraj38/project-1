@@ -1,0 +1,322 @@
+import React, { useState } from 'react';
+import { AlertCircle, CheckCircle2, AlertTriangle, Brain, Battery, Coffee, Heart, Book } from 'lucide-react';
+
+const questions = [
+  { question: "How often do you feel stressed?", options: ["Never", "Sometimes", "Often", "Always"], scores: [1, 2, 3, 4] },
+  { question: "How well do you sleep at night?", options: ["Very well", "Moderate", "Poor", "Very poor"], scores: [1, 2, 3, 4] },
+  { question: "Do you feel motivated to complete daily tasks?", options: ["Always", "Most of the time", "Rarely", "Never"], scores: [1, 2, 3, 4] },
+  { question: "How often do you feel anxious?", options: ["Never", "Sometimes", "Often", "Always"], scores: [1, 2, 3, 4] },
+  { question: "Do you enjoy activities you once loved?", options: ["Yes", "Somewhat", "Not much", "Not at all"], scores: [1, 2, 3, 4] },
+];
+
+const recommendations = {
+  low: {
+    title: "Maintaining Wellness",
+    description: "Your responses indicate a healthy mental state. Here's how to maintain it:",
+    icon: CheckCircle2,
+    color: "text-green-500",
+    borderColor: "border-green-200",
+    bgColor: "bg-green-50",
+    areas: [
+      {
+        title: "Continue Healthy Habits",
+        icon: Brain,
+        points: [
+          "Maintain regular exercise routine",
+          "Keep practicing mindfulness",
+          "Stay connected with friends and family",
+          "Continue your good sleep schedule"
+        ]
+      },
+      {
+        title: "Prevention Strategies",
+        icon: Battery,
+        points: [
+          "Regular mental health check-ins",
+          "Learn stress management techniques",
+          "Build resilience through challenges",
+          "Practice work-life balance"
+        ]
+      }
+    ]
+  },
+  mild: {
+    title: "Mild Stress Management",
+    description: "You're experiencing mild stress levels. Here are some strategies to help:",
+    icon: AlertCircle,
+    color: "text-blue-500",
+    borderColor: "border-blue-200",
+    bgColor: "bg-blue-50",
+    areas: [
+      {
+        title: "Immediate Actions",
+        icon: Coffee,
+        points: [
+          "Try deep breathing exercises daily",
+          "Take regular breaks during work",
+          "Establish a relaxation routine",
+          "Limit caffeine and screen time"
+        ]
+      },
+      {
+        title: "Lifestyle Adjustments",
+        icon: Heart,
+        points: [
+          "Start a gentle exercise routine",
+          "Practice basic meditation",
+          "Improve sleep hygiene",
+          "Connect with supportive friends"
+        ]
+      }
+    ]
+  },
+  moderate: {
+    title: "Moderate Stress Intervention",
+    description: "Your responses suggest moderate stress levels. Consider these recommendations:",
+    icon: AlertTriangle,
+    color: "text-yellow-500",
+    borderColor: "border-yellow-200",
+    bgColor: "bg-yellow-50",
+    areas: [
+      {
+        title: "Professional Support",
+        icon: Brain,
+        points: [
+          "Consider talking to a counselor",
+          "Join stress management workshops",
+          "Explore therapy options",
+          "Discuss with healthcare provider"
+        ]
+      },
+      {
+        title: "Self-Care Priorities",
+        icon: Book,
+        points: [
+          "Establish strict boundaries",
+          "Create a support network",
+          "Practice stress-relief techniques",
+          "Monitor mood patterns"
+        ]
+      }
+    ]
+  },
+  severe: {
+    title: "Immediate Attention Needed",
+    description: "Your responses indicate significant distress. Here are important steps to take:",
+    icon: AlertCircle,
+    color: "text-red-500",
+    borderColor: "border-red-200",
+    bgColor: "bg-red-50",
+    areas: [
+      {
+        title: "Urgent Actions",
+        icon: Brain,
+        points: [
+          "Seek professional help immediately",
+          "Contact a mental health hotline",
+          "Inform trusted family/friends",
+          "Consider medical evaluation"
+        ]
+      },
+      {
+        title: "Support System",
+        icon: Heart,
+        points: [
+          "Don't face this alone",
+          "Accept help from others",
+          "Take time off if needed",
+          "Focus on immediate self-care"
+        ]
+      }
+    ]
+  }
+};
+
+const MentalHealthQuiz = () => {
+  const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+  const [submitted, setSubmitted] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+
+  const progress = (answers.filter(answer => answer !== null).length / questions.length) * 100;
+
+  const handleAnswer = (index, score) => {
+    const newAnswers = [...answers];
+    newAnswers[index] = score;
+    setAnswers(newAnswers);
+    
+    if (currentQuestion < questions.length - 1) {
+      setTimeout(() => setCurrentQuestion(currentQuestion + 1), 300);
+    }
+  };
+
+  const handleSubmit = () => {
+    if (answers.includes(null)) {
+      alert("Please answer all questions");
+      return;
+    }
+    setSubmitted(true);
+  };
+
+  const getResult = () => {
+    const totalScore = answers.reduce((acc, score) => acc + score, 0);
+    const maxScore = questions.length * 4;
+    const percentage = (totalScore / maxScore) * 100;
+
+    let category;
+    if (totalScore <= 7) category = 'low';
+    else if (totalScore <= 12) category = 'mild';
+    else if (totalScore <= 17) category = 'moderate';
+    else category = 'severe';
+
+    return {
+      score: totalScore,
+      maxScore: maxScore,
+      percentage: percentage,
+      category: category,
+      details: recommendations[category]
+    };
+  };
+
+  const ResultsView = () => {
+    const result = getResult();
+    const Icon = result.details.icon;
+    
+    return (
+      <div className="mt-4 space-y-6">
+        <div className={`p-6 rounded-lg ${result.details.bgColor} border ${result.details.borderColor}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <Icon className={`w-6 h-6 ${result.details.color}`} />
+            <h2 className="text-lg font-bold">{result.details.title}</h2>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-600">Assessment Score:</span>
+              <span className="font-semibold">{result.score} / {result.maxScore}</span>
+            </div>
+            
+            <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div 
+                className="h-2.5 rounded-full transition-all duration-500"
+                style={{ 
+                  width: `${result.percentage}%`,
+                  backgroundColor: result.percentage <= 25 ? '#22c55e' : 
+                                 result.percentage <= 50 ? '#3b82f6' :
+                                 result.percentage <= 75 ? '#eab308' : '#ef4444'
+                }}
+              />
+            </div>
+
+            <p className="mt-4 text-gray-700">
+              {result.details.description}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {result.details.areas.map((area, index) => (
+            <div key={index} className="bg-white p-6 rounded-lg border">
+              <div className="flex items-center gap-3 mb-4">
+                <area.icon className={`w-5 h-5 ${result.details.color}`} />
+                <h3 className="font-semibold">{area.title}</h3>
+              </div>
+              <ul className="space-y-2">
+                {area.points.map((point, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <div className="mt-1.5">
+                      <div className={`w-1.5 h-1.5 rounded-full ${result.details.color}`} />
+                    </div>
+                    <span className="text-gray-700">{point}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={() => {
+              setSubmitted(false);
+              setAnswers(Array(questions.length).fill(null));
+              setCurrentQuestion(0);
+            }}
+            className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+          >
+            Take Quiz Again
+          </button>
+          <button
+            onClick={() => window.print()}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Print Results
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl">
+      <h1 className="text-xl font-bold mb-4">Mental Health Assessment</h1>
+      
+      {!submitted ? (
+        <>
+          <div className="mb-6">
+            <div className="flex justify-between text-sm text-gray-600 mb-2">
+              <span>Progress</span>
+              <span>{Math.round(progress)}%</span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div 
+                className="bg-blue-500 h-2 rounded-full transition-all duration-300" 
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            {questions.map((q, index) => (
+              <div 
+                key={index}
+                className={`transition-all duration-300 ${
+                  currentQuestion === index ? 'opacity-100' : 'opacity-50'
+                }`}
+              >
+                <p className="font-semibold mb-3">{q.question}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {q.options.map((option, i) => (
+                    <button
+                      key={i}
+                      className={`px-4 py-2 rounded-lg transition-all duration-200 ${
+                        answers[index] === q.scores[i]
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-100 hover:bg-gray-200"
+                      }`}
+                      onClick={() => handleAnswer(index, q.scores[i])}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {!answers.includes(null) && (
+            <button 
+              onClick={handleSubmit}
+              className="w-full mt-6 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Submit
+            </button>
+          )}
+        </>
+      ) : (
+        <ResultsView />
+      )}
+    </div>
+  );
+};
+
+export default MentalHealthQuiz;
